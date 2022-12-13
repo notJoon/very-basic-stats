@@ -1,0 +1,6 @@
+stats/**/**/*.js
+stats/**/**/*.map
+
+**/*.json
+
+.prettierrc
