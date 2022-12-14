@@ -1,6 +1,8 @@
 stats/**/**/*.js
 stats/**/**/*.map
 
-**/*.json
+**/tsconfig.json
 
 .prettierrc
+
+**/token.ts

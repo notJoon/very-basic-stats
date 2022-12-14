@@ -1,23 +1,28 @@
-import axios, { AxiosRequestConfig } from "axios"
+export const retries: any = async (
+    fetcher: any,
+    vars: object[],
+    retry = 0,
+): Promise<typeof retries> => {
+    if (retry < 0) {
+        throw new Error("exceed retry limit");
+    }
 
-/**
- * Send GraphQL request to GitHub API
- * 
- * @param {import('axios').AxiosRequestConfig['data']} data Request data 
- * @param {import('axios').AxiosRequestConfig['headers']} headers Request headers
- * 
- * @returns {Promise<any>} Axios response
- */
-export const request = (
-    data: AxiosRequestConfig['data'], 
-    headers: AxiosRequestConfig['headers']): Promise<any> => {
-    // @ts-ignore
-    return axios({
-        url: "https://api.github.com/graphql",
-        method: "post",
-        headers,
-        data,
-    });
-}
-
-export default request;
+    try {
+        let response = await fetcher(
+            vars,
+            process.env[`${retry + 1}`],
+            retry,
+        );
+        return response;
+    } catch (error: any) {
+        const is_bad = error.response.data && error.response.data.message === "Bad credentials";
+        
+        if (is_bad) {
+            console.log(`${retry + 1} Failed`);
+            retry++;
+            return await retries(fetcher, vars, retry);
+        } else {
+            return error.response;
+        }
+    }
+};
